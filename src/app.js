@@ -112,7 +112,7 @@ var doAjaxRequest = function(apiKey) {
   // Make request to standup today.
   ajax(
     {
-      url:'http://dailyscrum-staging.herokuapp.com/api/standups?apiKey=' + apiKey,
+      url:'http://go.stand-up.today/api/standups?apiKey=' + apiKey,
       type:'json'
     },
     function(data) {
