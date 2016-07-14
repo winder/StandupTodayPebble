@@ -2,6 +2,30 @@ var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
 var Settings = require('settings');
+ 
+
+var Clay = require('clay');
+var clayConfig = require('./config');
+var clay = new Clay(clayConfig, null, {autoHandleEvents: false});
+
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  //Get JSON dictionary
+  var configuration = JSON.parse(decodeURIComponent(e.response));
+  console.log("Configuration window returned: " + JSON.stringify(configuration));
+  
+  if (e && !e.response) {
+    return;
+  }
+  var dict = clay.getSettings(e.response);
+
+  // Save the Clay settings to the Settings module. 
+  Settings.option(dict);  
+});
+
 
 var myAPIKey = '';
 
@@ -30,8 +54,6 @@ var getActiveStandups = function(data) {
   // Otherwise display the active standups.
   else {
     for (var i = 0; i < data.length; i++) {
-      console.log(data[i]);
-      console.log(data[i].subteam);
       items.push({
          title:getTitleForStandup(data[i])
          });
@@ -85,20 +107,6 @@ var loadStandup = function(e) {
   activeStandupsMenu.hide();
 }
 
-// App Config Page
-Settings.config(
-  { url: 'http://pebble-config.herokuapp.com/config?title=Quick%20Config&fields=email_Username,password_Pass' },
-  function(e) {
-    console.log('opening configurable');
-    console.log(JSON.stringify(e));
-  },
-  function(e) {
-    console.log('closed configurable');
-    console.log(JSON.stringify(e));
-  }
-);
-
-
 /**
  * Main entry point!
  */
@@ -121,6 +129,9 @@ var text = new UI.Text({
 // Add to splashWindow and show
 splashWindow.add(text);
 splashWindow.show();
+
+var options = Settings.option();
+console.log(JSON.stringify(options));
 
 // Make request to standup today.
 ajax(
