@@ -21,7 +21,7 @@ module.exports = [
       },
       {
         "type": "input",
-        "messageKey": "standupTime",
+        "appKey": "standupTime",
         "label": "Standup Time",
         "attributes": {
           "placeholder": "10:00",
@@ -31,7 +31,7 @@ module.exports = [
       },
       {
         "type": "input",
-        "messageKey": "apiKey",
+        "appKey": "apiKey",
         "label": "Standup Today API Key",
         "attributes": {
           "placeholder": "e.g. 2a5e9b237ce32",
