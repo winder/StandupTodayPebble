@@ -2,6 +2,9 @@ var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
 var Settings = require('settings');
+var Wakeup = require('wakeup');
+var Clock = require('clock');
+var Vibe = require('ui/vibe');
 var Clay = require('clay');
 var clayConfig = require('./config');
 var clay = new Clay(clayConfig, null, {autoHandleEvents: false});
@@ -23,10 +26,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   // Save the Clay settings to the Settings module. 
   Settings.option(dict);
   
-  // Kick off an ajax request with new API key.
-  doAjaxRequest(dict.apiKey);
-  
-  // TODO: Timeline pins
+  // Use options to update the state.
+  updateWithOptions(dict);
 });
 
 var standupData;
@@ -37,6 +38,39 @@ var getTitleForStandup = function(standup) {
     return standup.subteam.name;
   } else {
     return standup.team.name;
+  }
+};
+
+/**
+ * Wakeup vibration.
+ */
+// Query whether we were launched by a wakeup event
+Wakeup.launch(function(e) {
+  if (e.wakeup) {
+    // Send a long vibration to the user wrist
+    Vibe.vibrate('long');
+  }
+});
+
+var updateWakeups = function(wakeupTime) {
+  var time = wakeupTime.split(':');
+  console.log('Setting wakeups weekdays at ' + time[0] + ':' + time[1]);
+  // Schedule a wakeup event.
+  Wakeup.schedule({ time: Clock.weekday('monday', time[0], time[1])}, function(e) {console.log(JSON.stringify(e));});
+  Wakeup.schedule({ time: Clock.weekday('tuesday', time[0], time[1])}, function(e) {console.log(JSON.stringify(e));});
+  Wakeup.schedule({ time: Clock.weekday('wednesday', time[0], time[1])}, function(e) {console.log(JSON.stringify(e));});
+  Wakeup.schedule({ time: Clock.weekday('thursday', time[0], time[1])}, function(e) {console.log(JSON.stringify(e));});
+  Wakeup.schedule({ time: Clock.weekday('friday', time[0], time[1])}, function(e) {console.log(JSON.stringify(e));});
+};
+
+var updateWithOptions = function(options) {
+  if (options.hasOwnProperty('apiKey')) {
+    doAjaxRequest(options.apiKey);
+  }
+  
+  Wakeup.cancel('all');
+  if (options.hasOwnProperty('standupTime')) {
+    updateWakeups(options.standupTime);
   }
 };
 
@@ -175,6 +209,4 @@ var text = new UI.Text({
 splashWindow.add(text);
 splashWindow.show();
 
-if (options.hasOwnProperty('apiKey')) {
-  doAjaxRequest(options.apiKey);
-}
+updateWithOptions(options);
