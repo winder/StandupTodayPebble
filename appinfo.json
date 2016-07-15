@@ -9,9 +9,10 @@
     "resources": {
         "media": [
             {
-                "file": "images/menu_icon.png",
+                "file": "images/28x28_icon.png",
+                "menuIcon": true,
                 "name": "IMAGE_MENU_ICON",
-                "type": "bitmap"
+                "type": "png"
             },
             {
                 "file": "images/logo_splash.png",
@@ -28,12 +29,6 @@
                 "name": "MONO_FONT_14",
                 "type": "font"
             },
-            {
-                "file": "images/28x28_icon",
-                "menuIcon": true,
-                "name": "IMAGES_28X28_ICON",
-                "type": "png"
-            }
         ]
     },
     "sdkVersion": "3",
