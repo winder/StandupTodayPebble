@@ -74,6 +74,7 @@ var updateWithOptions = function(options) {
   }
 };
 
+var attempts = 1;
 // Processes an array of standup objects.
 var getActiveStandups = function(data) {
   var items = [];
@@ -82,8 +83,9 @@ var getActiveStandups = function(data) {
   // TODO: start standup option.
   if (data.length === 0) {
     items.push({
-      title:"None!"
+      title:"None! (checks: " + attempts + ")"
       });
+    attempts+=1
   }
   // Otherwise display the active standups.
   else {
@@ -142,6 +144,15 @@ var loadStandup = function(e) {
   activeStandupsMenu.hide();
 };
 
+var isEmpty = function(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
+};
+
 var doAjaxRequest = function(apiKey) {
   // Make request to standup today.
   ajax(
@@ -151,11 +162,16 @@ var doAjaxRequest = function(apiKey) {
     },
     function(data) {
       standupData = data;
+      console.log("Received data:\n" + JSON.stringify(data));
       
       // Create an array of Menu items
       var activeStandups = getActiveStandups(data);
   
       // Construct Menu to show to user
+      if (!isEmpty(activeStandupsMenu)) {
+        activeStandupsMenu.hide();
+      }
+      
       activeStandupsMenu = new UI.Menu({
         sections: [{
           title: 'Active Standups',
@@ -164,7 +180,13 @@ var doAjaxRequest = function(apiKey) {
       });
   
       // Callback when a standup is chosen.
-      activeStandupsMenu.on('select', loadStandup);
+      if (data.length > 0) {
+        activeStandupsMenu.on('select', loadStandup);
+      } else {
+        activeStandupsMenu.on('select', function(e) {
+          doAjaxRequest(apiKey);
+        });
+      }
    
       // Show the standup list, hide the splash
       activeStandupsMenu.show();
@@ -202,7 +224,7 @@ var text = new UI.Text({
   color:'black',
   textOverflow:'wrap',
   textAlign:'center',
-	backgroundColor:'white'
+  backgroundColor:'white'
 });
 
 // Add to splashWindow and show
